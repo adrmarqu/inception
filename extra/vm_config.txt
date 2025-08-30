@@ -1,0 +1,92 @@
+Extra: 
+
+sudo apt update && sudo apt upgrade -y
+sudo apt install -y git make docker docker-compose
+
+1- Actualizar sistema
+
+sudo apt update && sudo apt upgrade -y
+sudo apt install -y sudo curl wget vim git
+
+
+2- Instalar docker
+
+sudo apt install -y docker.io
+sudo systemctl enable --now docker
+
+# Para no usar sudo cada vez
+
+sudo usermod -aG docker $USER
+(luego cierra sesión y vuelve a entrar)
+
+# Verificar
+
+docker --version
+docker run hello-world
+
+
+3- Instalar docker compose
+
+sudo apt install -y docker-compose
+docker-compose --version
+
+# Si es una version antigua
+
+sudo curl -L "https://github.com/docker/compose/releases/download/v2.20.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
+docker-compose --version
+
+
+4- Instalar herramientas utilies
+
+sudo apt install -y make
+sudo apt install -y unzip zip tar htop net-tools
+
+
+5- Preparar carpetas del proyecto
+
+cd ~
+git clone <inception> inception
+mkdir -p ~/inception/data/wordpress
+mkdir -p ~/inception/data/mariadb
+
+
+6- Configurar el dominio local
+
+En /etc/hosts -> <IP_VM> adrmarqu.42.fr
+
+
+7- Esqueleto
+
+inception/
+├── Makefile
+├── .env
+├── docker-compose.yml
+├── secrets/
+│   ├── credentials.txt
+│   ├── db_password.txt
+│   └── db_root_password.txt
+├── srcs/
+│   ├── requirements/
+│   │   ├── mariadb/
+│   │   │   ├── Dockerfile
+│   │   │   ├── conf/
+│   │   │   └── tools/
+│   │   ├── nginx/
+│   │   │   ├── Dockerfile
+│   │   │   ├── conf/
+│   │   │   └── tools/
+│   │   ├── wordpress/
+│   │   │   ├── Dockerfile
+│   │   │   └── tools/
+│   │   └── bonus/
+│   │       ├── redis/
+│   │       ├── ftp/
+│   │       ├── adminer/
+│   │       └── static_site/
+│   └── tools/
+├── data/
+│   ├── mariadb/      # volumen persistente para la base de datos
+│   └── wordpress/    # volumen persistente para archivos del sitio
+└── extra/            # opcional: scripts, backups, imágenes grandes
+

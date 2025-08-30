@@ -1,0 +1,53 @@
+1- Descargar el debian.iso
+
+2- Crear nueva vm
+
+	- Nombre: InceptionVM
+	- Machine folder: sgoinfire/USB
+	- Type: Lynux
+	- Version: Debian (64-bit)
+
+3- Configurar el hardware
+
+	- RAM: 4096MB
+	- CPU: 4CPU
+	- Video memory: 64Mb
+
+4- Crear disco virtual
+
+	- Tipo: VDI
+	- Almacenamiento: dinamico
+	- Size: 50 GB
+	- Ubicacion: /goinfre/adrmarqu/VirtualBox VMs/InceptionVM/Inception.vdi
+
+5- Montar la ISO
+
+	- En settings -> storage, poner la iso
+
+6- Red
+
+	- En settings -> network, activar el bridger adapter
+
+7- Iniciar instalacion de debian
+
+	- Elegir graphical install
+	- Language: English
+	- Hostname: inception
+	- Domain name: adrmarqu.42.fr
+	- Root password: la que quieras
+	- New user: adrmarqu
+
+8- Particion del disco
+
+	- Guided-use entire disk
+	- All files in one partition
+
+9- Software a instalar
+
+	- ssh server
+	- standar system utilities
+
+10- Post-instalacion
+
+	- Desmonta la iso en virtualbox (settings -> storage -> cd -> remove disk)
+	- Arrancar de nuevo
