@@ -1,0 +1,54 @@
+1. NGINX
+
+Base: debian:bullseye o alpine:3.16.
+
+Instalar nginx, openssl.
+
+Generar certificado TLSv1.2/1.3 en tools/init.sh.
+
+Config en nginx.conf: reverse proxy → WordPress (php-fpm) en la red interna.
+
+Solo expone 443.
+
+
+2. MariaDB
+
+Base: Alpine/Debian.
+
+Instalar mariadb, mariadb-client.
+
+Configurar con --bind-address=0.0.0.0.
+
+Script de init en tools/init_db.sh que:
+
+Crea DB wordpress.
+
+Crea usuario WP + admin (no llamado admin).
+
+Aplica contraseñas desde secrets/env.
+
+Volumen: /home/login/data/mariadb.
+
+
+3. WordPress + php-fpm
+
+Base: Alpine/Debian.
+
+Instalar php-fpm, php-mysqli, curl, wp-cli.
+
+Configurar php-fpm (php-fpm.conf).
+
+Script tools/init_wp.sh: descarga WP, configura wp-config.php con env vars, instala WP vía wp-cli.
+
+Volumen: /home/login/data/wordpress.
+
+
+4. Bonus ideas
+
+Redis: cache para WP (usar plugin redis-cache).
+
+FTP server (vsftpd) conectado al volumen WP.
+
+Adminer para gestionar DB vía web.
+
+Sitio estático (HTML/CSS/JS) servido por un contenedor nginx extra.

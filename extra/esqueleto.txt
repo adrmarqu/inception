@@ -1,0 +1,23 @@
+inception/
+├── Makefile
+├── secrets/
+│   ├── db_password.txt
+│   ├── db_root_password.txt
+│   └── credentials.txt
+├── srcs/
+│   ├── .env
+│   ├── docker-compose.yml
+│   └── requirements/
+│       ├── mariadb/
+│       │   ├── Dockerfile
+│       │   ├── conf/ (configuración my.cnf)
+│       │   └── tools/ (scripts init db)
+│       ├── nginx/
+│       │   ├── Dockerfile
+│       │   ├── conf/ (nginx.conf, ssl configs)
+│       │   └── tools/ (script de generación certs auto)
+│       ├── wordpress/
+│       │   ├── Dockerfile
+│       │   ├── conf/ (php-fpm.conf)
+│       │   └── tools/ (wp-cli, setup scripts)
+│       └── bonus/ (si haces redis, ftp, adminer, etc.)
