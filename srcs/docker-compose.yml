@@ -1,55 +1,80 @@
-version: "3.9"
-
 services:
   nginx:
     build: ./requirements/nginx
     container_name: nginx
+    restart: unless-stopped
     ports:
       - "443:443"
     volumes:
-      - wordpress:/var/www/html
-    depends_on:
-      - wordpress
+      - wp_data:/var/www/html
+      - ./requirements/nginx/conf:/etc/nginx/conf.d:ro
+      - ./requirements/nginx/tools/certs:/etc/ssl/certs:ro
     networks:
       - inception_net
-    restart: always
+    depends_on:
+      - wordpress
 
   wordpress:
     build: ./requirements/wordpress
     container_name: wordpress
-    env_file: .env
+    restart: unless-stopped
+    environment:
+      WORDPRESS_DB_HOST: mariadb:3306
+      WORDPRESS_DB_NAME: ${MYSQL_DATABASE}
+      WORDPRESS_DB_USER_FILE: ${MYSQL_USER_FILE}
+      WORDPRESS_DB_PASSWORD_FILE: ${MYSQL_PASSWORD_FILE}
+      WORDPRESS_TABLE_PREFIX: ${WORDPRESS_TABLE_PREFIX}
+      WORDPRESS_DEBUG: ${WORDPRESS_DEBUG}
     volumes:
-      - wordpress:/var/www/html
-    depends_on:
-      - mariadb
+      - wp_data:/var/www/html
     networks:
       - inception_net
-    restart: always
+    depends_on:
+      - mariadb
+    secrets:
+      - db_password
+      - db_user
 
   mariadb:
     build: ./requirements/mariadb
     container_name: mariadb
-    env_file: .env
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD_FILE: ${MYSQL_ROOT_PASSWORD_FILE}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER_FILE: ${MYSQL_USER_FILE}
+      MYSQL_PASSWORD_FILE: ${MYSQL_PASSWORD_FILE}
     volumes:
-      - mariadb:/var/lib/mysql
+      - db_data:/var/lib/mysql
     networks:
       - inception_net
-    restart: always
+    secrets:
+      - db_root_password
+      - db_password
+      - db_user
 
 volumes:
-  wordpress:
+  wp_data:
     driver: local
     driver_opts:
       type: none
-      device: /home/${LOGIN}/data/wordpress
+      device: /home/adrmarqu/data/wordpress
       o: bind
-  mariadb:
+  db_data:
     driver: local
     driver_opts:
       type: none
-      device: /home/${LOGIN}/data/mariadb
+      device: /home/adrmarqu/data/mysql
       o: bind
 
 networks:
   inception_net:
     driver: bridge
+
+secrets:
+  db_root_password:
+    file: ./secrets/db_root_password.txt
+  db_user:
+    file: ./secrets/db_user.txt
+  db_password:
+    file: ./secrets/db_password.txt
