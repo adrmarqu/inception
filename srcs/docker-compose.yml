@@ -1,4 +1,3 @@
-version: '3.8'
 
 networks:
   inception_net:
@@ -27,7 +26,7 @@ volumes:
 services:
   nginx:
     build:
-      context: ./srcs/requirements/nginx
+      context: ./requirements/nginx
       dockerfile: Dockerfile
     container_name: nginx
     restart: always
@@ -45,7 +44,7 @@ services:
 
   wordpress:
     build:
-      context: ./srcs/requirements/wordpress
+      context: ./requirements/wordpress
       dockerfile: Dockerfile
     container_name: wordpress
     restart: always
@@ -66,7 +65,7 @@ services:
 
   mariadb:
     build:
-      context: ./srcs/requirements/mariadb
+      context: ./requirements/mariadb
       dockerfile: Dockerfile
     container_name: mariadb
     restart: always
