@@ -9,19 +9,19 @@ volumes:
     driver_opts:
       type: none
       o: bind
-      device: ./data/nginx
+      device: ../data/nginx
   wordpress_data:
     driver: local
     driver_opts:
       type: none
       o: bind
-      device: ./data/wordpress
+      device: ../data/wordpress
   mariadb_data:
     driver: local
     driver_opts:
       type: none
       o: bind
-      device: ./data/mariadb
+      device: ../data/mariadb
 
 services:
   nginx:
@@ -36,11 +36,11 @@ services:
       - inception_net
     volumes:
       - nginx_data:/etc/nginx/ssl
-      - ./srcs/requirements/nginx/conf:/etc/nginx/conf.d:ro
+      - ./requirements/nginx/conf:/etc/nginx/conf.d:ro
     depends_on:
       - wordpress
     env_file:
-      - ./srcs/.env
+      - .env
 
   wordpress:
     build:
@@ -61,7 +61,7 @@ services:
       - db_password
       - db_root_password
     env_file:
-      - ./srcs/.env
+      - .env
 
   mariadb:
     build:
@@ -82,10 +82,10 @@ services:
       - db_password
       - db_root_password
     env_file:
-      - ./srcs/.env
+      - .env
 
 secrets:
   db_password:
-    file: ./secrets/db_password.txt
+    file: ../secrets/db_password.txt
   db_root_password:
-    file: ./secrets/db_root_password.txt
+    file: ../secrets/db_root_password.txt
