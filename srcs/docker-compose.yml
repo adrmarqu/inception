@@ -1,8 +1,5 @@
 version: '3.8'
 
-env_file:
-  - ./srcs/.env
-
 networks:
   inception_net:
     driver: bridge
@@ -43,6 +40,8 @@ services:
       - ./srcs/requirements/nginx/conf:/etc/nginx/conf.d:ro
     depends_on:
       - wordpress
+    env_file:
+      - ./srcs/.env
 
   wordpress:
     build:
@@ -62,6 +61,8 @@ services:
     secrets:
       - db_password
       - db_root_password
+    env_file:
+      - ./srcs/.env
 
   mariadb:
     build:
@@ -81,6 +82,8 @@ services:
     secrets:
       - db_password
       - db_root_password
+    env_file:
+      - ./srcs/.env
 
 secrets:
   db_password:

@@ -48,6 +48,7 @@ help:
 	@echo "  make restart   - Reiniciar contenedores"
 	@echo "  make logs      - Ver logs de todos los contenedores"
 	@echo "  make clean     - Borrar contenedores, imágenes y volúmenes"
+	@echo "  make fclean    - Borrar $(DATA_DIR), contenedores, imágenes y volúmenes"
 	@echo "  make help      - Mostrar esta ayuda"
 
 .PHONY: all build up down restart logs clean setup help
