@@ -1,2 +1,89 @@
+version: '3.8'
 
-servicies:
+env_file:
+  - ./srcs/.env
+
+networks:
+  inception_net:
+    driver: bridge
+
+volumes:
+  nginx_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./data/nginx
+  wordpress_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./data/wordpress
+  mariadb_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./data/mariadb
+
+services:
+  nginx:
+    build:
+      context: ./srcs/requirements/nginx
+      dockerfile: Dockerfile
+    container_name: nginx
+    restart: always
+    ports:
+      - "443:443"
+    networks:
+      - inception_net
+    volumes:
+      - nginx_data:/etc/nginx/ssl
+      - ./srcs/requirements/nginx/conf:/etc/nginx/conf.d:ro
+    depends_on:
+      - wordpress
+
+  wordpress:
+    build:
+      context: ./srcs/requirements/wordpress
+      dockerfile: Dockerfile
+    container_name: wordpress
+    restart: always
+    networks:
+      - inception_net
+    environment:
+      WORDPRESS_DB_HOST: mariadb:3306
+      WORDPRESS_DB_USER: ${MYSQL_USER}
+      WORDPRESS_DB_PASSWORD_FILE: /run/secrets/db_password
+      WORDPRESS_DB_NAME: ${MYSQL_DATABASE}
+    volumes:
+      - wordpress_data:/var/www/html
+    secrets:
+      - db_password
+      - db_root_password
+
+  mariadb:
+    build:
+      context: ./srcs/requirements/mariadb
+      dockerfile: Dockerfile
+    container_name: mariadb
+    restart: always
+    networks:
+      - inception_net
+    environment:
+      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/db_root_password
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD_FILE: /run/secrets/db_password
+    volumes:
+      - mariadb_data:/var/lib/mysql
+    secrets:
+      - db_password
+      - db_root_password
+
+secrets:
+  db_password:
+    file: ./secrets/db_password.txt
+  db_root_password:
+    file: ./secrets/db_root_password.txt
