@@ -10,8 +10,8 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 # Copiar configuración personalizada de NGINX
-COPY conf/nginx.conf /etc/nginx/nginx.conf
-COPY conf/ssl /etc/nginx/ssl
+#COPY conf/nginx.conf /etc/nginx/nginx.conf
+#COPY conf/ssl /etc/nginx/ssl
 
 # Exponer solo el puerto 443
 EXPOSE 443

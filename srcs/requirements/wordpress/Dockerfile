@@ -18,4 +18,4 @@ WORKDIR /var/www/html
 RUN chown -R www-data:www-data /var/www/html
 
 # Configurar PHP-FPM para correr en foreground
-CMD ["php-fpm7.4", "-F"]
+CMD ["php-fpm", "-F"]

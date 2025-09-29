@@ -31,11 +31,12 @@ logs:
 	$(DOCKER_COMPOSE) logs -f
 
 clean:
-	@echo "🧹 Limpiando contenedores, imágenes y volúmenes..."
-	$(DOCKER_COMPOSE) down -v --rmi all --remove-orphans
+	@echo "🧹 Limpiando contenedores..."
+	$(DOCKER_COMPOSE) down --remove-orphans
 
 fclean: clean
-	@echo "🧹 Limpiando datos..."
+	@echo "🧹 Limpiando datos y volúmenes..."
+	$(DOCKER_COMPOSE) down -v --rmi all --remove-orphans
 	rm -rf $(DATA_DIR)
 
 help:
@@ -47,7 +48,7 @@ help:
 	@echo "  make down      - Detener contenedores"
 	@echo "  make restart   - Reiniciar contenedores"
 	@echo "  make logs      - Ver logs de todos los contenedores"
-	@echo "  make clean     - Borrar contenedores, imágenes y volúmenes"
+	@echo "  make clean     - Borrar contenedores"
 	@echo "  make fclean    - Borrar $(DATA_DIR), contenedores, imágenes y volúmenes"
 	@echo "  make help      - Mostrar esta ayuda"
 
