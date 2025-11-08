@@ -1,55 +1,47 @@
-DOCKER_COMPOSE = docker-compose -f srcs/docker-compose.yml --env-file srcs/.env
-SERVICES = nginx wordpress mariadb
-DATA_DIR = ./data
+DC = docker-compose -f ./srcs/docker-compose.yml --env-file srcs/.env
+DATA = /home/adrmarqu/data
 
-all: setup build up
-
-setup:
-	@echo "📁 Creando carpetas de datos..."
-	@mkdir -p $(DATA_DIR)
-	@for service in $(SERVICES); do \
-		mkdir -p $(DATA_DIR)/$$service; \
-	done
-	@echo "✅ Carpetas de datos listas en $(DATA_DIR)"
+all: build up
 
 build:
-	@echo "🔧 Construyendo todas las imágenes..."
-	$(DOCKER_COMPOSE) build
+	mkdir -p $(DATA)
+	mkdir -p $(DATA)/WordPress
+	mkdir -p $(DATA)/DB
+	$(DC) build
 
 up:
-	@echo "🚀 Levantando los contenedores..."
-	$(DOCKER_COMPOSE) up -d
+	$(DC) up -d
 
 down:
-	@echo "🛑 Deteniendo los contenedores..."
-	$(DOCKER_COMPOSE) down
-
-restart: down up
-
-logs:
-	@echo "📄 Mostrando logs de los contenedores..."
-	$(DOCKER_COMPOSE) logs -f
+	$(DC) down
 
 clean:
-	@echo "🧹 Limpiando contenedores..."
-	$(DOCKER_COMPOSE) down --remove-orphans
+	$(DC) down --remove-orphans
 
-fclean: clean
-	@echo "🧹 Limpiando datos y volúmenes..."
-	$(DOCKER_COMPOSE) down -v --rmi all --remove-orphans
-	rm -rf $(DATA_DIR)
+fclean:
+	$(DC) down -v --rmi all --remove-orphans
+	sudo rm -rf $(DATA)
+
+restart: clean all
+
+re: fclean all
+
+dangling:
+	docker image prune -f
 
 help:
-	@echo "📋 Comandos disponibles:"
-	@echo "  make all       - Crear carpetas de datos, construir imágenes y levantar contenedores"
-	@echo "  make setup     - Crear carpetas de datos para los servicios"
-	@echo "  make build     - Construir imágenes de todos los servicios"
-	@echo "  make up        - Levantar contenedores en segundo plano"
-	@echo "  make down      - Detener contenedores"
-	@echo "  make restart   - Reiniciar contenedores"
-	@echo "  make logs      - Ver logs de todos los contenedores"
-	@echo "  make clean     - Borrar contenedores"
-	@echo "  make fclean    - Borrar $(DATA_DIR), contenedores, imágenes y volúmenes"
-	@echo "  make help      - Mostrar esta ayuda"
+	@echo "📋 Available commands:"
+	@echo "  make all	- Create data folders, build images, and launch containers"
+	@echo "  make build	- Build images of all services"
+	@echo "  make up	- Launch containers in the background"
+	@echo "  make down	- Stop containers"
+	@echo "  make restart	- Restart containers"
+	@echo "  make re	- Delete all and restart"
+	@echo "  make clean	- Delete containers"
+	@echo "  make fclean	- Delete $(DATA), containers, images and volumes"
+	@echo "  make dangling	- Delete old containers"
+	@echo "  make help	- Show this help"
 
-.PHONY: all build up down restart logs clean setup help
+h: help
+
+.PHONY: all build up down kill clean fclean restart re help h dangling

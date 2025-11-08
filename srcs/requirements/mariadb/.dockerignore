@@ -1,0 +1,18 @@
+# Ignorar archivos temporales y logs
+*.log
+*.tmp
+*.swp
+*.bak
+
+# Ignorar configuraciones locales que no van en la imagen
+conf/*.local
+
+# Ignorar secretos y credenciales
+../../secrets/
+.env
+
+# Ignorar Git y Docker
+.git
+.gitignore
+Dockerfile
+.dockerignore

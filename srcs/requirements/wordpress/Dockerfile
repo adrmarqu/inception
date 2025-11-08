@@ -1,21 +1,34 @@
-# Usamos Debian estable (penúltima versión)
-FROM debian:bookworm-slim
+FROM debian:bullseye
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Instalar PHP y extensiones necesarias
 RUN apt-get update && \
-    apt-get install -y php-fpm php-mysql php-xml php-gd php-curl unzip curl && \
+    apt-get install -y \
+    php7.4-fpm \
+    php7.4-mysql \
+    php7.4-cli \
+    php7.4-gd \
+    php7.4-xml \
+    php7.4-curl \
+    php7.4-zip \
+    php7.4-mbstring \
+    mariadb-client curl less wget tar unzip && \
+    curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar && \
+    chmod +x wp-cli.phar && mv wp-cli.phar /usr/local/bin/wp && \
     rm -rf /var/lib/apt/lists/*
 
-# Crear carpeta de WordPress
+RUN mkdir -p /run/php /var/www/html && \
+    chown -R www-data:www-data /run/php /var/www/html && \
+    chmod -R 755 /var/www/html
+
+COPY ./conf/www.conf /etc/php/7.4/fpm/pool.d/www.conf
+
+COPY ./tools/setup.sh /usr/local/bin/setup.sh
+RUN chmod +x /usr/local/bin/setup.sh
+
 WORKDIR /var/www/html
 
-# Copiar archivos de WordPress si los tienes localmente
-# COPY ./wordpress/ /var/www/html/
+EXPOSE 9000
 
-# Cambiar permisos para php-fpm
-RUN chown -R www-data:www-data /var/www/html
+ENTRYPOINT ["/usr/local/bin/setup.sh"]
 
-# Configurar PHP-FPM para correr en foreground
-CMD ["php-fpm", "-F"]

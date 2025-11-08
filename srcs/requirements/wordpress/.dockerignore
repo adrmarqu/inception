@@ -1,0 +1,23 @@
+# Ignorar archivos temporales y logs
+*.log
+*.tmp
+*.swp
+*.bak
+
+# Ignorar configuraciones locales
+wp-config.php
+conf/*.local
+
+# Ignorar secretos y credenciales
+../../secrets/
+.env
+
+# Ignorar Git y Docker
+.git
+.gitignore
+Dockerfile
+.dockerignore
+
+# Ignorar carpetas de uploads locales o caches que no deben estar en la imagen
+wp-content/uploads/
+wp-content/cache/
