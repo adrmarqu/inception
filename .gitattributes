@@ -1,0 +1,8 @@
+# Ignorar HTML para el cálculo del lenguaje
+*.html linguist-vendored
+
+# Ignorar archivos de configuración
+*.md linguist-documentation
+
+# Forzar que ciertos archivos se consideren Dockerfile
+Dockerfile linguist-language=Dockerfile
