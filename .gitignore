@@ -1,4 +1,4 @@
-# Compiled files and temporary files
+# Compiled and temporary files
 *.o
 *.d
 *.swp
@@ -8,7 +8,17 @@
 # Persistent data volumes
 data/
 data
-secrets/*
 
-# Root .env copy
+# Ignore any .env file anywhere in the repository
+**/.env
 .env
+*.env
+
+# Never ignore .env.example files
+!.env.example
+!**/.env.example
+!*.env.example
+
+# Ignore all files inside secrets/ except .gitkeep (keeps the folder in git)
+secrets/*
+!secrets/.gitkeep
