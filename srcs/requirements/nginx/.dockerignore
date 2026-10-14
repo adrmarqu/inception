@@ -4,8 +4,7 @@
 *.swp
 *.bak
 
-# Ignorar directorios de herramientas locales
-tools/
+# Ignorar configuraciones locales
 conf/*.local
 
 # Ignorar secretos y credenciales
@@ -17,4 +16,3 @@ conf/*.local
 .gitignore
 Dockerfile
 .dockerignore
-

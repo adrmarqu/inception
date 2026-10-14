@@ -1,25 +1,19 @@
-FROM debian:bullseye-slim
+FROM debian:bookworm-slim
 
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && \
-    apt-get install -y nginx openssl gettext-base && \
+    apt-get install -y nginx openssl gettext-base curl && \
     rm -rf /var/lib/apt/lists/*
 
-RUN apt-get update && apt-get install -y net-tools iproute2
+RUN rm -f /etc/nginx/sites-enabled/default /etc/nginx/sites-available/default
 
-ARG DOMAIN_NAME
-ENV DOMAIN_NAME=${DOMAIN_NAME}
+RUN mkdir -p /etc/nginx/ssl /var/www/html /etc/nginx/templates
 
-RUN mkdir -p /etc/nginx/ssl && \
-    openssl req -x509 -nodes -days 365 \
-      -subj "/C=ES/ST=Madrid/L=Madrid/O=42/OU=Inception/CN=${DOMAIN_NAME}" \
-      -newkey rsa:2048 \
-      -keyout /etc/nginx/ssl/server.key \
-      -out /etc/nginx/ssl/server.crt
-
-COPY conf/default.conf /etc/nginx/sites-enabled/default
+COPY conf/default.conf /etc/nginx/templates/default.conf.template
+COPY tools/entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
 
 EXPOSE 443
 
-CMD ["nginx", "-g", "daemon off;"]
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]

@@ -1,4 +1,14 @@
+# Compiled files and temporary files
 *.o
 *.d
 *.swp
+*.log
+.DS_Store
+
+# Persistent data volumes
+data/
 data
+secrets/*
+
+# Root .env copy
+.env
