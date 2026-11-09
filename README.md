@@ -1,97 +1,31 @@
-# 🐳 Inception - 42 School
+# Inception - 42 Barcelona
 
-This project consists of designing and administering a complete web infrastructure, containerized with **Docker** and orchestrated using **Docker Compose**, strictly following the system administration and security guidelines of the **42** curriculum.
+Inception is a system administration and DevOps project from the 42 Barcelona curriculum. The goal is to build, configure, and orchestrate a secure, modular web infrastructure containerized with Docker and orchestrated with Docker Compose on Debian Bookworm. The infrastructure consists of an NGINX reverse proxy acting as the sole entrypoint with TLS 1.2 and 1.3 encryption, a WordPress application driven by PHP-FPM, and a dedicated MariaDB database server. All services communicate over an isolated private bridge network with persistent host storage.
 
----
+# Prerequisites
 
-## 🏗️ System Architecture
+To configure and launch the Inception stack, you will need:
 
-The infrastructure runs on an isolated private bridge network (`inception_net`) and consists of three dedicated services, each built inside its own container using **Debian Bookworm**:
+- Docker Engine (v20.10 or higher, or Docker Desktop)
+- Docker Compose (v2 integrated via docker compose)
+- GNU Make and standard Unix utilities
+- Superuser privileges (sudo) to update /etc/hosts for domain resolution
 
-```
-                       [ Client / Browser ]
-                                │
-                                │ (Port 443 - HTTPS / TLS 1.2 or 1.3)
-                                ▼
-                  ┌───────────────────────────┐
-                  │      NGINX Container      │
-                  │     (Single Entrypoint)   │
-                  └─────────────┬─────────────┘
-                                │
-                                │ (FastCGI - Port 9000)
-                                ▼
-                  ┌───────────────────────────┐
-                  │    WordPress + PHP-FPM    │
-                  └─────────────┬─────────────┘
-                                │
-                                │ (MySQL - Port 3306)
-                                ▼
-                  ┌───────────────────────────┐
-                  │     MariaDB Container     │
-                  └───────────────────────────┘
-```
+# Configuration
 
-### Services Breakdown
-
-1. **NGINX:**
-   * The **sole entrypoint** to the infrastructure (exposing port `443` only).
-   * Strictly configured for **TLSv1.2 and TLSv1.3** protocols only.
-   * Dynamically generates self-signed SSL certificates for the configured domain.
-   * Proxies PHP requests to WordPress over FastCGI (`wordpress:9000`).
-
-2. **WordPress + PHP-FPM 8.2:**
-   * Runs PHP-FPM listening on port `9000` (isolated from external access).
-   * Automated installation, database configuration, and user creation via **WP-CLI**.
-   * Creates two users: a secure administrator (complying with 42 naming restrictions) and a regular user with the author role.
-
-3. **MariaDB 10.11:**
-   * Dedicated database server listening on port `3306` inside the internal network.
-   * Robust initialization script that automatically handles empty volume mounts via `mariadb-install-db`.
-   * Secure initialization with dedicated user privileges and root credentials.
-
-### Volumes and Data Persistence
-
-Data persists across container restarts, stops, and rebuilds through host bind mounts configured at `${DATA_PATH}`:
-* `${DATA_PATH}/wordpress` ➔ `/var/www/html` in WordPress and NGINX.
-* `${DATA_PATH}/mariadb` ➔ `/var/lib/mysql` in MariaDB.
-
----
-
-## 📋 Prerequisites
-
-* **Docker Engine** (v20+ or Docker Desktop on macOS).
-* **Docker Compose** (v2 integrated via `docker compose`).
-* **Make** and standard Unix utilities.
-* Superuser privileges (`sudo`) to edit `/etc/hosts` and manage host data directories.
-
----
-
-## ⚙️ Step-by-Step Configuration
-
-### 1. Clone the Repository
-
+1. Clone the repository:
 ```bash
-git clone <repository-url> inception
+git clone https://github.com/adrmarqu/inception.git
 cd inception
 ```
 
-### 2. Configure Environment Variables (`.env`)
-
-Copy the template file to `srcs/.env`:
-
-```bash
-cp srcs/.env.example srcs/.env
-```
-
-Open `srcs/.env` and adjust the variables to match your environment:
-
+2. Configure environment variables in srcs/.env:
+Copy the template file to srcs/.env if not present, and update the values:
 ```env
 # Domain configuration (mandatory 42 format: <login>.42.fr)
 DOMAIN_NAME=adrmarqu.42.fr
 
 # Base host storage path for persistent volumes:
-# - On 42 school computers (Linux): /home/<login>/data
-# - On personal Linux or macOS:     ./data or /Users/<username>/data
 DATA_PATH=/home/adrmarqu/data
 
 # MariaDB Credentials
@@ -101,10 +35,9 @@ MYSQL_PASSWORD=your_secure_db_password
 MYSQL_ROOT_PASSWORD=your_secure_root_password
 
 # WordPress Site Settings
-WORDPRESS_TITLE="Inception Site"
+WORDPRESS_TITLE=Inception Site
 
-# WordPress Administrator
-# IMPORTANT: 42 evaluation strictly forbids usernames containing 'admin' or 'administrator'
+# WordPress Administrator (Forbidden to contain 'admin' or 'administrator')
 WORDPRESS_ADMIN_USER=superuser42
 WORDPRESS_ADMIN_PASSWORD=your_secure_admin_password
 WORDPRESS_ADMIN_EMAIL=superuser42@adrmarqu.42.fr
@@ -115,83 +48,83 @@ WORDPRESS_USER_PASSWORD=your_secure_user_password
 WORDPRESS_USER_EMAIL=wp_adri@adrmarqu.42.fr
 ```
 
-> [!TIP]
-> **No manual secret file setup required:** When you run `make`, the Makefile automatically reads passwords from `srcs/.env` and populates any missing or empty files in `secrets/`.
-
-### 3. Add Domain to `/etc/hosts`
-
-To resolve `<login>.42.fr` to your local machine, add an entry to `/etc/hosts`:
-
+3. Map the domain name in your local /etc/hosts file:
 ```bash
 echo "127.0.0.1 adrmarqu.42.fr" | sudo tee -a /etc/hosts
 ```
 
-*(Replace `adrmarqu.42.fr` with your configured `DOMAIN_NAME`)*.
+# Execution
 
----
+### Start the Infrastructure
 
-## 🚀 Running and Managing the Project
-
-All container lifecycle tasks are managed via the root [Makefile](file:///Users/adria/Desktop/42Barcelona/inception/Makefile):
-
-### Start Everything (Build and Run)
-
+Build the container images and launch the infrastructure in detached mode:
 ```bash
 make
 ```
-*(Equivalent to `make all`. Validates `.env`, creates data and secret directories, builds Docker images, and starts all containers in detached mode)*.
+The Makefile automatically validates .env, prepares secrets in secrets/, provisions host storage directories, builds each custom image, and starts all services.
 
-### Available Commands
+### Accessing the Services
 
-| Command | Description |
-| :--- | :--- |
-| `make` / `make all` | Initialize directories & secrets, build images, and start all containers |
-| `make up` | Start containers in the background |
-| `make down` | Stop containers without deleting images or volume data |
-| `make start` | Start stopped containers |
-| `make stop` | Stop running containers without removing them |
-| `make status` | View container status (`docker compose ps`) |
-| `make logs` | Stream real-time logs from all running services |
-| `make clean` | Stop containers and remove orphan networks |
-| `make fclean` | **Deep clean:** Stop containers, remove Docker volumes, images, and wipe host data directories |
-| `make re` | Complete reset: runs `make fclean` followed by `make all` |
-| `make dangling` | Prune unused and dangling Docker images |
-| `make help` | Display available Makefile targets |
+Open your browser and navigate to:
+- WordPress Website: https://adrmarqu.42.fr
+- WordPress Admin Panel: https://adrmarqu.42.fr/wp-admin
 
----
+Note: Because the TLS certificate is dynamically self-signed, bypass the browser security warning to enter the site.
 
-## 🌐 Verification and Access
+### Stop the Infrastructure
 
-1. **Visit the Website:**
-   Navigate to:
-   ```
-   https://adrmarqu.42.fr
-   ```
-   > [!NOTE]
-   > Because the SSL certificate is self-signed, browsers will display a security warning. Click **"Advanced"** and proceed to the site (**"Proceed to ... (unsafe)"**).
+Stop all running containers without removing data volumes:
+```bash
+make down
+```
 
-2. **Access the WordPress Admin Panel:**
-   Navigate to:
-   ```
-   https://adrmarqu.42.fr/wp-admin
-   ```
-   Log in with the credentials defined in `srcs/.env`:
-   * **Username:** `WORDPRESS_ADMIN_USER`
-   * **Password:** `WORDPRESS_ADMIN_PASSWORD`
+# Project Structure
 
----
+```
+inception/
+├── Makefile                     # Infrastructure lifecycle automation
+├── secrets/                     # Secure credentials mounted into containers
+└── srcs/
+    ├── docker-compose.yml       # Service composition and network definition
+    ├── .env                     # Global environment parameters
+    └── requirements/
+        ├── nginx/               # NGINX reverse proxy service
+        │   ├── Dockerfile       # Custom Debian Bookworm build
+        │   ├── conf/            # TLS configuration and FastCGI rules
+        │   └── tools/           # SSL certificate generation scripts
+        ├── wordpress/           # WordPress + PHP-FPM service
+        │   ├── Dockerfile       # PHP-FPM 8.2 and WP-CLI dependencies
+        │   ├── conf/            # www.conf listening on port 9000
+        │   └── tools/           # Auto-installer script via WP-CLI
+        └── mariadb/             # MariaDB relational database service
+            ├── Dockerfile       # MariaDB 10.11 server setup
+            ├── conf/            # 50-server.cnf binding and network config
+            └── tools/           # Database initialization and grant script
+```
 
-## 🔍 42 Evaluation Checklist
+# Commands and Makefile Targets
 
-* [x] **No `latest` tag:** No service image or Dockerfile uses `:latest`.
-* [x] **Debian Bookworm base:** All containers are built from `debian:bookworm-slim`.
-* [x] **Strict port exposure:** Only port `443` is exposed on the host. MariaDB (`3306`) and WordPress (`9000`) communicate exclusively within `inception_net`.
-* [x] **TLS 1.2 / 1.3:** NGINX rejects legacy insecure protocols (SSLv3, TLS 1.0, TLS 1.1).
-* [x] **Admin username compliance:** The admin username does not contain `admin` or `administrator`.
-* [x] **Volume persistence verified:**
-  ```bash
-  make down
-  make up
-  ```
-  All WordPress posts, user accounts, and database entries remain intact after restarting containers.
-* [x] **Safe cleanup (`make fclean`):** Removes only WordPress and MariaDB volume data without risking project source files.
+- make or make all: Create directories, generate secrets, build images, and run all containers
+- make up: Start containers in the background
+- make down: Stop containers gracefully
+- make start: Start previously stopped containers
+- make stop: Stop running containers without removal
+- make status: Inspect container status via docker compose ps
+- make logs: Follow live log output from all services
+- make clean: Stop containers and clean orphan networks
+- make fclean: Complete reset, wiping containers, images, volumes, and persistent host files
+- make re: Recompile and reinitialize the entire infrastructure from scratch
+
+# Architecture and Security Features
+
+- Single Exposed Port: Only port 443 (HTTPS) is accessible on the host machine. MariaDB (port 3306) and WordPress (port 9000) communicate exclusively inside the private inception_net network.
+- Protocol Security: NGINX strictly accepts TLS 1.2 and TLS 1.3 cryptographic protocols, discarding legacy vulnerable versions.
+- Data Persistence: Persistent host volume bind mounts ensure database tables, WordPress media, and uploaded content survive container restarts and complete rebuilds.
+- 42 Evaluation Compliance: No service uses latest tags, all images derive from debian:bookworm-slim, and administrative credentials satisfy evaluation constraints.
+
+# Author Details
+
+Author: Adrià Márquez Nebot
+Github: https://github.com/adrmarqu
+LinkedIn: https://www.linkedin.com/in/adria-marquez
+Portfolio: https://adrmarqu.github.io
